@@ -1,3 +1,6 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/VfW8bnt7)
-# WebHw2
-Name: ..............
+# ACPowered
+“Beneficial for Developers, Publishers and Users like alternate current”
+Bara Juang Indonesiano
+1313624078
+Computer Science 2024 B
+Jakarta State University
