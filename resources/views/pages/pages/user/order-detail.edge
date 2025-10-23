@@ -1,0 +1,575 @@
+@layout.app({ title: 'Order Details' })
+  @slot('main')
+    <div class="order-detail-section">
+      <div class="container">
+        {{-- Back Button --}}
+        <div class="back-nav">
+          <a href="/orders" class="back-link">
+            ← Back to My Orders
+          </a>
+        </div>
+
+        {{-- Order Header --}}
+        <div class="order-detail-header">
+          <div class="header-left">
+            <h1 class="page-title">
+              Order #{{ order.id }}
+            </h1>
+            <p class="order-date">
+              Placed on {{ order.createdAt.toFormat('dd MMMM yyyy, HH:mm') }}
+            </p>
+          </div>
+          <div class="header-right">
+            <span class="order-status-badge status-{{ order.status }}">
+              {{ order.status }}
+            </span>
+          </div>
+        </div>
+
+        <div class="order-detail-grid">
+          {{-- Order Information --}}
+          <div class="detail-card">
+            <h2 class="card-title">
+              📋 Order Information
+            </h2>
+
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="info-label">Order ID:</span>
+                <span class="info-value">#{{ order.id }}</span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">Status:</span>
+                <span class="info-value status-text status-{{ order.status }}">
+                  @if(order.status === 'pending')
+                    ⏳ Pending Payment
+                  @elseif(order.status === 'processing')
+                    🔄 Processing
+                  @elseif(order.status === 'completed')
+                    ✅ Completed
+                  @elseif(order.status === 'failed')
+                    ❌ Failed
+                  @elseif(order.status === 'cancelled')
+                    🚫 Cancelled
+                  @end
+                </span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">Payment Method:</span>
+                <span class="info-value">
+                  @if(order.paymentMethod === 'cash')
+                    💵 Cash on Delivery
+                  @elseif(order.paymentMethod === 'credit_card')
+                    💳 Credit Card
+                  @elseif(order.paymentMethod === 'bank_transfer')
+                    🏦 Bank Transfer
+                  @elseif(order.paymentMethod === 'e_wallet')
+                    📱 E-Wallet
+                  @else
+                    N/A
+                  @end
+                </span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">Order Date:</span>
+                <span class="info-value">{{ order.createdAt.toFormat('dd MMM yyyy, HH:mm') }}</span>
+              </div>
+            </div>
+          </div>
+
+          {{-- Shipping Information --}}
+          <div class="detail-card">
+            <h2 class="card-title">
+              📍 Shipping Information
+            </h2>
+
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="info-label">Shipping Address:</span>
+                <span class="info-value">{{ order.shippingAddress }}</span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">Contact Number:</span>
+                <span class="info-value">{{ order.phoneNumber }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {{-- Order Items --}}
+        <div class="detail-card items-card">
+          <h2 class="card-title">
+            📦 Order Items
+          </h2>
+
+          <div class="order-items-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    Product
+                  </th>
+                  <th>
+                    Price
+                  </th>
+                  <th>
+                    Quantity
+                  </th>
+                  <th>
+                    Subtotal
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                @each(item in order.items)
+                  <tr>
+                    <td>
+                      <div class="product-cell">
+                        <span class="product-icon">{{ item.product.icon }}</span>
+                        <div class="product-info">
+                          <span class="product-name">{{ item.product.name }}</span>
+                          @if(item.product.category)
+                            <span class="product-category">{{ item.product.category }}</span>
+                          @end
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      @let(formattedPrice = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 0,
+                      }).format(item.price))
+                      {{ formattedPrice }}
+                    </td>
+                    <td class="qty-cell">
+                      {{ item.quantity }}
+                    </td>
+                    <td class="subtotal-cell">
+                      @let(subtotal = item.price * item.quantity)
+                      @let(formattedSubtotal = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 0,
+                      }).format(subtotal))
+                      {{ formattedSubtotal }}
+                    </td>
+                  </tr>
+                @end
+              </tbody>
+            </table>
+          </div>
+
+          <div class="order-summary">
+            <div class="summary-row">
+              <span>Subtotal:</span>
+              <span>
+                @let(formattedTotal = new Intl.NumberFormat('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  minimumFractionDigits: 0,
+                }).format(order.totalAmount))
+                {{ formattedTotal }}
+              </span>
+            </div>
+            <div class="summary-row total-row">
+              <strong>Total Amount:</strong>
+              <strong class="total-amount">
+                @let(formattedTotal = new Intl.NumberFormat('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  minimumFractionDigits: 0,
+                }).format(order.totalAmount))
+                {{ formattedTotal }}
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        {{-- Action Buttons --}}
+        <div class="order-actions">
+          @if(order.status === 'pending')
+            <a href="/orders/{{ order.id }}/payment" class="btn btn-primary">
+              Complete Payment →
+            </a>
+          @elseif(order.status === 'completed')
+            <a href="/menu" class="btn btn-primary">
+              Order Again
+            </a>
+          @end
+          <a href="/orders" class="btn btn-outline">
+            Back to Orders
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .order-detail-section {
+        padding: 2rem 0;
+        min-height: 60vh;
+      }
+      
+      .back-nav {
+        margin-bottom: 1.5rem;
+      }
+      
+      .back-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color 0.2s;
+      }
+      
+      .back-link:hover {
+        color: #764ba2;
+      }
+      
+      .order-detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+      
+      .header-left .page-title {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+      }
+      
+      .order-date {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 1rem;
+      }
+      
+      .order-status-badge {
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+      
+      .order-status-badge.status-pending {
+        background: #fbbf24;
+        color: #78350f;
+        border-color: #fbbf24;
+      }
+      
+      .order-status-badge.status-processing {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+      }
+      
+      .order-status-badge.status-completed {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+      }
+      
+      .order-status-badge.status-failed {
+        background: #ef4444;
+        color: white;
+        border-color: #ef4444;
+      }
+      
+      .order-status-badge.status-cancelled {
+        background: #6b7280;
+        color: white;
+        border-color: #6b7280;
+      }
+      
+      .order-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      
+      .detail-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .items-card {
+        grid-column: 1 / -1;
+      }
+      
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0 0 1.5rem 0;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+      }
+      
+      .info-rows {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .info-label {
+        color: #666;
+        font-weight: 500;
+        flex-shrink: 0;
+      }
+      
+      .info-value {
+        color: #333;
+        font-weight: 500;
+        text-align: right;
+      }
+      
+      .status-text {
+        font-weight: 600;
+      }
+      
+      .status-text.status-pending {
+        color: #d97706;
+      }
+      
+      .status-text.status-processing {
+        color: #2563eb;
+      }
+      
+      .status-text.status-completed {
+        color: #059669;
+      }
+      
+      .status-text.status-failed {
+        color: #dc2626;
+      }
+      
+      .status-text.status-cancelled {
+        color: #4b5563;
+      }
+      
+      .order-items-table {
+        overflow-x: auto;
+        margin-bottom: 1.5rem;
+      }
+      
+      .order-items-table table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      .order-items-table thead {
+        background: #f9fafb;
+      }
+      
+      .order-items-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #666;
+        border-bottom: 2px solid #e5e7eb;
+      }
+      
+      .order-items-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      
+      .product-cell {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      
+      .product-icon {
+        font-size: 2.5rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f3f4f6;
+        border-radius: 8px;
+      }
+      
+      .product-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      
+      .product-name {
+        font-weight: 600;
+        color: #333;
+      }
+      
+      .product-category {
+        font-size: 0.875rem;
+        color: #666;
+        text-transform: capitalize;
+      }
+      
+      .qty-cell {
+        text-align: center;
+        font-weight: 500;
+      }
+      
+      .subtotal-cell {
+        text-align: right;
+        font-weight: 600;
+        color: #667eea;
+      }
+      
+      .order-summary {
+        padding-top: 1.5rem;
+        border-top: 2px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.75rem;
+      }
+      
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 3rem;
+        min-width: 300px;
+      }
+      
+      .total-row {
+        font-size: 1.25rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e5e7eb;
+      }
+      
+      .total-amount {
+        color: #667eea;
+        font-size: 1.5rem;
+      }
+      
+      .order-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        padding: 2rem 0;
+      }
+      
+      .btn {
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+        display: inline-block;
+        text-align: center;
+        font-size: 1rem;
+      }
+      
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+      
+      .btn-outline {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+      }
+      
+      .btn-outline:hover {
+        background: #667eea;
+        color: white;
+      }
+      
+      @media (max-width: 768px) {
+        .order-detail-section {
+          padding: 1rem 0;
+        }
+      
+        .order-detail-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+      
+        .header-left .page-title {
+          font-size: 1.5rem;
+        }
+      
+        .order-status-badge {
+          align-self: flex-end;
+        }
+      
+        .order-detail-grid {
+          grid-template-columns: 1fr;
+        }
+      
+        .info-row {
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+      
+        .info-value {
+          text-align: left;
+        }
+      
+        .order-items-table table {
+          font-size: 0.875rem;
+        }
+      
+        .order-items-table th,
+        .order-items-table td {
+          padding: 0.75rem 0.5rem;
+        }
+      
+        .product-cell {
+          flex-direction: column;
+          text-align: center;
+        }
+      
+        .summary-row {
+          min-width: 100%;
+        }
+      
+        .order-actions {
+          flex-direction: column;
+        }
+      
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  @endslot
+@end

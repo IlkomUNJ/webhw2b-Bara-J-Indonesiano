@@ -1,0 +1,120 @@
+@layout.app({ title: 'Wishlist Saya' })
+  @slot('main')
+    <section class="page-hero">
+      <div class="container">
+        <h1>
+          Wishlist Saya
+        </h1>
+        <p>
+          Menu favorit yang ingin Anda pesan
+        </p>
+      </div>
+    </section>
+
+    <section class="wishlist-section">
+      <div class="container">
+        <div class="wishlist-header">
+          <h2>
+            Daftar Wishlist
+          </h2>
+          @if(products.length > 0)
+            <form
+              action="{{ route('wishlist.clear') }}"
+              method="POST"
+              data-confirm-delete="Semua item wishlist akan dihapus!"
+            >
+              {{ csrfField() }}
+            <button type="submit" class="btn btn-outline">Hapus Semua</button>
+            </form>
+          @end
+        </div>
+
+        @if(products.length === 0)
+          <div class="empty-wishlist">
+            <div class="empty-icon">
+              🍚
+            </div>
+            <h3>
+              Wishlist Anda Kosong
+            </h3>
+            <p>
+              Mulai tambahkan menu favorit Anda ke wishlist!
+            </p>
+            <a href="{{ route('user.search') }}" class="btn btn-primary">Jelajahi Menu</a>
+          </div>
+        @else
+          <div class="wishlist-grid">
+            @each(product in products)
+              <div class="bowl-card">
+                <div class="bowl-icon">
+                  {{ product.icon }}
+                </div>
+                <h3>
+                  {{ product.name }}
+                </h3>
+                <p>
+                  {{ product.description }}
+                </p>
+                <span class="price">Rp {{ product.formattedPrice }}</span>
+                @if(product.badge)
+                  <span class="badge {{ product.badge }}">
+                    @if(product.badge === 'popular')
+                      POPULER
+                    @elseif(product.badge === 'spicy')
+                      PEDAS
+                    @elseif(product.badge === 'healthy')
+                      SEHAT
+                    @elseif(product.badge === 'premium')
+                      PREMIUM
+                    @end
+                  </span>
+                @end
+                <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                  <div style="display: flex; gap: 10px;">
+                    <form action="{{ route('cart.addFromWishlist', [product.id]) }}" method="POST" style="flex: 1;">
+                      {{ csrfField() }}
+                      <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        🛒 Tambah ke Keranjang
+                      </button>
+                    </form>
+                    <a href="{{ route('user.product', [product.id]) }}" class="btn btn-outline" style="flex: 1;">
+                      👁️ Detail
+                    </a>
+                  </div>
+                  <form
+                    action="{{ route('wishlist.remove', [product.wishlistId]) }}"
+                    method="POST"
+                    data-confirm-delete="Hapus {{ product.name }} dari wishlist?"
+                  >
+                    {{ csrfField() }}
+                    <button type="submit" class="btn btn-outline-danger" style="width: 100%;">
+                      🗑️ Hapus dari Wishlist
+                    </button>
+                  </form>
+                </div>
+              </div>
+            @end
+          </div>
+
+          <div class="wishlist-summary">
+            <div class="summary-content">
+              <h3>
+                Ringkasan Wishlist
+              </h3>
+              <div class="summary-row">
+                <span>Total Items:</span>
+                <span>{{ products.length }}</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total Harga:</span>
+                <span>Rp {{ totalPrice }}</span>
+              </div>
+              <a href="{{ route('cart.index') }}" class="btn btn-primary btn-large">🛒 Lihat Keranjang</a>
+              <a href="{{ route('user.menu') }}" class="btn btn-outline btn-large">📋 Lanjut Belanja</a>
+            </div>
+          </div>
+        @end
+      </div>
+    </section>
+  @endslot
+@end

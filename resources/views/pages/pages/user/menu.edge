@@ -1,0 +1,146 @@
+@layout.app({ title: 'Menu' })
+  @slot('main')
+    <section class="page-hero">
+      <div class="container">
+        <h1>
+          Menu Takeaway & Delivery
+        </h1>
+        <p>
+          Jelajahi berbagai macam nasi mangkok khas Indonesia siap takeaway!
+          Pesan online atau via telepon untuk pengalaman yang praktis dan lezat.
+        </p>
+      </div>
+    </section>
+
+    <section class="menu">
+      <div class="container">
+        {{-- Ricebowl Category --}}
+        @if(ricebowls.length > 0)
+          <div class="menu-category">
+            <h2 class="category-title">
+              🍚 Ricebowl Populer
+            </h2>
+            <div class="menu-grid">
+              @each(product in ricebowls)
+                <div class="bowl-card">
+                  <div class="bowl-icon">
+                    {{ product.icon }}
+                  </div>
+                  <h3>
+                    {{ product.name }}
+                  </h3>
+                  <p>
+                    {{ product.description }}
+                  </p>
+                  <span class="price">Rp {{ product.price.toLocaleString('id-ID') }}</span>
+                  @if(product.badge)
+                    <span class="badge {{ product.badge }}">
+                      @if(product.badge === 'popular')
+                        POPULER
+                      @elseif(product.badge === 'spicy')
+                        PEDAS
+                      @elseif(product.badge === 'healthy')
+                        SEHAT
+                      @elseif(product.badge === 'premium')
+                        PREMIUM
+                      @end
+                    </span>
+                  @end
+                  <div style="margin-top: 15px;">
+                    <a href="{{ route('user.product', [product.id]) }}" class="btn btn-primary">
+                      Lihat Detail
+                    </a>
+                  </div>
+                </div>
+              @end
+            </div>
+          </div>
+        @end
+        
+        @if(pakets.length > 0)
+          <div class="menu-category">
+            <h2 class="category-title">
+              📦 Paket Hemat
+            </h2>
+            <div class="menu-grid">
+              @each(product in pakets)
+                <div class="bowl-card">
+                  <div class="bowl-icon">
+                    {{ product.icon }}
+                  </div>
+                  <h3>
+                    {{ product.name }}
+                  </h3>
+                  <p>
+                    {{ product.description }}
+                  </p>
+                  <span class="price">Rp {{ product.price.toLocaleString('id-ID') }}</span>
+                  @if(product.badge)
+                    <span class="badge {{ product.badge }}">
+                      @if(product.badge === 'popular')
+                        POPULER
+                      @elseif(product.badge === 'spicy')
+                        PEDAS
+                      @elseif(product.badge === 'healthy')
+                        SEHAT
+                      @elseif(product.badge === 'premium')
+                        PREMIUM
+                      @end
+                    </span>
+                  @end
+                  <div style="margin-top: 15px;">
+                    <a href="{{ route('user.product', [product.id]) }}" class="btn btn-primary">
+                      Lihat Detail
+                    </a>
+                  </div>
+                </div>
+              @end
+            </div>
+          </div>
+        @end
+        
+        @if(minumans.length > 0)
+          <div class="menu-category">
+            <h2 class="category-title">
+              🥤 Minuman
+            </h2>
+            <div class="menu-grid">
+              @each(product in minumans)
+                <div class="bowl-card">
+                  <div class="bowl-icon">
+                    {{ product.icon }}
+                  </div>
+                  <h3>
+                    {{ product.name }}
+                  </h3>
+                  <p>
+                    {{ product.description }}
+                  </p>
+                  <span class="price">Rp {{ product.price.toLocaleString('id-ID') }}</span>
+                  @if(product.badge)
+                    <span class="badge {{ product.badge }}">
+                      @if(product.badge === 'popular')
+                        POPULER
+                      @elseif(product.badge === 'spicy')
+                        PEDAS
+                      @elseif(product.badge === 'healthy')
+                        SEHAT
+                      @elseif(product.badge === 'premium')
+                        PREMIUM
+                      @end
+                    </span>
+                  @end
+                  <div style="margin-top: 15px;">
+                    <a href="{{ route('user.product', [product.id]) }}" class="btn btn-primary">
+                      Lihat Detail
+                    </a>
+                  </div>
+                </div>
+              @end
+            </div>
+          </div>
+        @end
+      </div>
+    </section>
+  @endslot
+@end

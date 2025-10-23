@@ -1,0 +1,163 @@
+@layout.app({ title: 'Cari Menu' })
+  @slot('main')
+    <section class="search-section">
+      <div class="container">
+        {{-- Search Form --}}
+        <form action="{{ route('user.search') }}" method="GET">
+          {{-- Search Bar --}}
+          <div class="search-header-container">
+            <div class="search-bar">
+              <input
+                type="text"
+                name="query"
+                value="{{ filters.query || '' }}"
+                placeholder="Cari menu (contoh: Nasi Katsu, Telur, Ayam...)"
+                class="search-input"
+              />
+              <button type="submit" class="btn btn-primary">
+                🔍 Cari
+              </button>
+            </div>
+          </div>
+
+          {{-- Filters Section --}}
+          <div class="search-filters-card">
+            <h3 class="filter-title">
+              Filter Menu
+            </h3>
+
+            <div class="filters-grid">
+              <div class="filter-item">
+                <label for="categoryFilter">Kategori:</label>
+                <select name="category" id="categoryFilter" class="filter-select" onchange="this.form.submit()">
+                  <option value="">
+                    Semua Kategori
+                  </option>
+                  <option value="ricebowl" {{ filters.category === 'ricebowl' ? 'selected' : '' }}>
+                    Ricebowl Populer
+                  </option>
+                  <option value="paket" {{ filters.category === 'paket' ? 'selected' : '' }}>
+                    Paket Hemat
+                  </option>
+                  <option value="minuman" {{ filters.category === 'minuman' ? 'selected' : '' }}>
+                    Minuman
+                  </option>
+                </select>
+              </div>
+
+              <div class="filter-item">
+                <label for="priceFilter">Harga:</label>
+                <select name="priceRange" id="priceFilter" class="filter-select" onchange="this.form.submit()">
+                  <option value="">
+                    Semua Harga
+                  </option>
+                  <option value="0-20000">
+                    Di bawah Rp 20.000
+                  </option>
+                  <option value="20000-30000">
+                    Rp 20.000 - Rp 30.000
+                  </option>
+                  <option value="30000-50000">
+                    Rp 30.000 - Rp 50.000
+                  </option>
+                  <option value="50000-">
+                    Di atas Rp 50.000
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <a href="{{ route('user.search') }}" class="btn btn-outline">Reset Filter</a>
+          </div>
+        </form>
+
+        {{-- Results Section --}}
+        <div class="search-results-section">
+          @if(hasFilters)
+            <h2 class="results-heading">
+              Hasil Pencarian 
+              <span class="result-count">({{ products.length }} menu ditemukan)</span>
+            </h2>
+
+            @if(products.length > 0)
+              {{-- Results Grid --}}
+              <div class="results-grid">
+                @each(product in products)
+                  <div class="bowl-card">
+                    <div class="bowl-icon">
+                      {{ product.icon }}
+                    </div>
+                    <h3>
+                      {{ product.name }}
+                    </h3>
+                    <p>
+                      {{ product.description.substring(0, 80) }}...
+                    </p>
+                    <span class="price">Rp {{ product.price.toLocaleString('id-ID') }}</span>
+                    @if(product.badge)
+                      <span class="badge {{ product.badge }}">
+                        @if(product.badge === 'popular')
+                          POPULER
+                        @elseif(product.badge === 'spicy')
+                          PEDAS
+                        @elseif(product.badge === 'healthy')
+                          SEHAT
+                        @elseif(product.badge === 'premium')
+                          PREMIUM
+                        @end
+                      </span>
+                    @end
+                    <div style="margin-top: 15px;">
+                      <a href="{{ route('user.product', [product.id]) }}" class="btn btn-primary">
+                        Lihat Detail
+                      </a>
+                    </div>
+                  </div>
+                @end
+              </div>
+            @else
+              {{-- No Results State --}}
+              <div class="no-results-state">
+                <div class="no-results-icon">
+                  😕
+                </div>
+                <h3>
+                  Tidak ada hasil ditemukan
+                </h3>
+                <p>
+                  Coba kata kunci lain atau ubah filter Anda
+                </p>
+              </div>
+            @end
+          @else
+            {{-- Initial State --}}
+            <div class="initial-state">
+              <div class="initial-icon">
+                🍽️
+              </div>
+              <h3>
+                Mulai Pencarian Menu
+              </h3>
+              <p>
+                Gunakan kolom pencarian di atas untuk menemukan menu favorit Anda
+              </p>
+
+              <div class="popular-searches">
+                <p>
+                  <strong>Pencarian Populer:</strong>
+                </p>
+                <div class="search-tags">
+                  <a href="{{ route('user.search') }}?query=Nasi+Katsu" class="search-tag">Nasi Katsu</a>
+                  <a href="{{ route('user.search') }}?query=Ayam" class="search-tag">Ayam</a>
+                  <a href="{{ route('user.search') }}?query=Telur" class="search-tag">Telur</a>
+                  <a href="{{ route('user.search') }}?query=Rendang" class="search-tag">Rendang</a>
+                  <a href="{{ route('user.search') }}?query=Paket" class="search-tag">Paket Hemat</a>
+                </div>
+              </div>
+            </div>
+          @end
+        </div>
+      </div>
+    </section>
+  @endslot
+@end
