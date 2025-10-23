@@ -1,0 +1,134 @@
+@layout.app({ title: 'Shopping Cart' })
+  @slot('main')
+    <div class="cart-section">
+      <div class="container">
+        <h1 class="page-title">
+          🛒 Shopping Cart
+        </h1>
+
+        @if(cartItems.length === 0)
+          <div class="empty-cart">
+            <div class="empty-icon">
+              🛒
+            </div>
+            <h3>
+              Your cart is empty
+            </h3>
+            <p>
+              Start adding some delicious items!
+            </p>
+            <a href="/menu" class="btn btn-primary">Browse Menu</a>
+          </div>
+        @else
+          <div class="cart-content">
+            <div class="cart-table-wrapper">
+              <table class="cart-table">
+                <thead>
+                  <tr>
+                    <th>
+                      Product
+                    </th>
+                    <th>
+                      Price
+                    </th>
+                    <th>
+                      Quantity
+                    </th>
+                    <th>
+                      Subtotal
+                    </th>
+                    <th class="text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @each(item in cartItems)
+                    <tr class="cart-item">
+                      <td>
+                        <div class="cart-product-info">
+                          <span class="product-icon">{{ item.product.icon }}</span>
+                          <div class="product-details">
+                            <h4>
+                              {{ item.product.name }}
+                            </h4>
+                            @if(item.product.category)
+                              <span class="product-category">{{ item.product.category }}</span>
+                            @end
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="product-price">{{ item.product.formattedPrice }}</span>
+                      </td>
+                      <td>
+                        <form action="{{ route('cart.update', { id: item.id }) }}" method="POST" class="quantity-form">
+                          {{ csrfField() }}
+                          <input type="hidden" name="_method" value="PUT" />
+                          <input
+                            type="number"
+                            name="quantity"
+                            value="{{ item.quantity }}"
+                            min="1"
+                            max="99"
+                            class="quantity-input"
+                          />
+                          <button type="submit" class="btn-update">Update</button>
+                        </form>
+                      </td>
+                      <td>
+                        <span class="item-subtotal">{{ item.formattedSubtotal }}</span>
+                      </td>
+                      <td class="text-right">
+                        <form
+                          action="{{ route('cart.destroy', { id: item.id }) }}"
+                          method="POST"
+                          data-confirm-delete="Remove {{ item.product.name }} from cart?"
+                          style="display: inline;"
+                        >
+                          {{ csrfField() }}
+                          <input type="hidden" name="_method" value="DELETE" />
+                          <button type="submit" class="btn-remove">🗑️ Remove</button>
+                        </form>
+                      </td>
+                    </tr>
+                  @end
+                </tbody>
+              </table>
+            </div>
+
+            <div class="cart-footer">
+              <div class="cart-actions">
+                <form
+                  action="{{ route('cart.clear') }}"
+                  method="POST"
+                  data-confirm-delete="Clear all items from cart?"
+                >
+                  {{ csrfField() }}
+                  <input type="hidden" name="_method" value="DELETE" />
+                  <button type="submit" class="btn btn-outline-danger">
+                    🗑️ Clear Cart
+                  </button>
+                </form>
+              </div>
+
+              <div class="cart-summary">
+                <div class="summary-row">
+                  <span>Total Items:</span>
+                  <strong>{{ cartItems.length }}</strong>
+                </div>
+                <div class="summary-row total">
+                  <span>Total Amount:</span>
+                  <strong class="total-amount">{{ formattedTotal }}</strong>
+                </div>
+                <a href="{{ route('checkout') }}" class="btn btn-primary btn-block">
+                  Proceed to Checkout →
+                </a>
+              </div>
+            </div>
+          </div>
+        @end
+      </div>
+    </div>
+  @endslot
+@end

@@ -1,0 +1,432 @@
+@layout.app({ title: 'My Orders' })
+  @slot('main')
+    <div class="orders-section">
+      <div class="container">
+        <h1 class="page-title">
+          📦 My Orders
+        </h1>
+
+        @if(orders.length === 0)
+          <div class="empty-orders">
+            <div class="empty-icon">
+              📦
+            </div>
+            <h3>
+              No orders yet
+            </h3>
+            <p>
+              Start ordering some delicious food!
+            </p>
+            <a href="/menu" class="btn btn-primary">Browse Menu</a>
+          </div>
+        @else
+          <div class="orders-list">
+            @each(order in orders)
+              <div class="order-card">
+                <div class="order-card-header">
+                  <div class="order-header-left">
+                    <h3 class="order-id">
+                      Order #{{ order.id }}
+                    </h3>
+                    <p class="order-date">
+                      {{ order.createdAt.toFormat('dd MMM yyyy, HH:mm') }}
+                    </p>
+                  </div>
+                  <div class="order-header-right">
+                    <span class="order-status-badge status-{{ order.status }}">
+                      {{ order.status }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="order-card-body">
+                  <div class="order-items-preview">
+                    @each(item in order.items.slice(0, 3))
+                      <div class="order-item-preview">
+                        <span class="item-icon">{{ item.product.icon }}</span>
+                        <div class="item-preview-info">
+                          <span class="item-name">{{ item.product.name }}</span>
+                          <span class="item-qty">x{{ item.quantity }}</span>
+                        </div>
+                      </div>
+                    @end
+                    
+                    @if(order.items.length > 3)
+                      <div class="more-items">
+                        +{{ order.items.length - 3 }} more item{{ order.items.length - 3 > 1 ? 's' : '' }}
+                      </div>
+                    @end
+                  </div>
+
+                  <div class="order-info-grid">
+                    <div class="order-info-item">
+                      <span class="info-label">💰 Payment</span>
+                      <span class="info-value">
+                        @if(order.paymentMethod === 'cash')
+                          Cash on Delivery
+                        @elseif(order.paymentMethod === 'credit_card')
+                          Credit Card
+                        @elseif(order.paymentMethod === 'bank_transfer')
+                          Bank Transfer
+                        @elseif(order.paymentMethod === 'e_wallet')
+                          E-Wallet
+                        @else
+                          N/A
+                        @end
+                      </span>
+                    </div>
+                    <div class="order-info-item">
+                      <span class="info-label">📍 Delivery</span>
+                      <span class="info-value">
+                        @if(order.shippingAddress.length > 30)
+                          {{ order.shippingAddress.substring(0, 30) }}...
+                        @else
+                          {{ order.shippingAddress }}
+                        @end
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="order-total-row">
+                    <span class="total-label">Total Amount:</span>
+                    <strong class="total-amount">
+                      @let(formattedTotal = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 0,
+                      }).format(order.totalAmount))
+                      {{ formattedTotal }}
+                    </strong>
+                  </div>
+                </div>
+
+                <div class="order-card-footer">
+                  <a href="/orders/{{ order.id }}" class="btn btn-outline">
+                    View Details
+                  </a>
+
+                  @if(order.status === 'pending')
+                    <a href="/orders/{{ order.id }}/payment" class="btn btn-primary">
+                      Complete Payment
+                    </a>
+                  @elseif(order.status === 'processing')
+                    <span class="status-note">
+                      ⏳ Processing your order...
+                    </span>
+                  @elseif(order.status === 'completed')
+                    <span class="status-note success">
+                      ✅ Order completed
+                    </span>
+                  @elseif(order.status === 'failed')
+                    <span class="status-note error">
+                      ❌ Payment failed
+                    </span>
+                  @elseif(order.status === 'cancelled')
+                    <span class="status-note">
+                      🚫 Order cancelled
+                    </span>
+                  @end
+                </div>
+              </div>
+            @end
+          </div>
+        @end
+      </div>
+    </div>
+
+    <style>
+      .orders-section {
+        padding: 2rem 0;
+        min-height: 60vh;
+      }
+      
+      .empty-orders {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .empty-orders .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+      }
+      
+      .empty-orders h3 {
+        font-size: 1.5rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+      }
+      
+      .empty-orders p {
+        color: #666;
+        margin-bottom: 2rem;
+      }
+      
+      .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      
+      .order-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      
+      .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+      
+      .order-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      
+      .order-header-left h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+      
+      .order-date {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.875rem;
+        opacity: 0.9;
+      }
+      
+      .order-status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      
+      .order-status-badge.status-pending {
+        background: #fbbf24;
+        color: #78350f;
+        border-color: #fbbf24;
+      }
+      
+      .order-status-badge.status-processing {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+      }
+      
+      .order-status-badge.status-completed {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+      }
+      
+      .order-status-badge.status-failed {
+        background: #ef4444;
+        color: white;
+        border-color: #ef4444;
+      }
+      
+      .order-status-badge.status-cancelled {
+        background: #6b7280;
+        color: white;
+        border-color: #6b7280;
+      }
+      
+      .order-card-body {
+        padding: 1.5rem;
+      }
+      
+      .order-items-preview {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      
+      .order-item-preview {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      
+      .order-item-preview .item-icon {
+        font-size: 2rem;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f3f4f6;
+        border-radius: 8px;
+      }
+      
+      .item-preview-info {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .item-name {
+        font-weight: 500;
+        color: #333;
+      }
+      
+      .item-qty {
+        color: #666;
+        font-size: 0.875rem;
+      }
+      
+      .more-items {
+        padding: 0.5rem 1rem;
+        background: #f3f4f6;
+        border-radius: 8px;
+        text-align: center;
+        color: #666;
+        font-size: 0.875rem;
+      }
+      
+      .order-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      
+      .order-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      
+      .info-label {
+        font-size: 0.875rem;
+        color: #666;
+      }
+      
+      .info-value {
+        font-weight: 500;
+        color: #333;
+        text-transform: capitalize;
+      }
+      
+      .order-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.125rem;
+      }
+      
+      .total-label {
+        color: #666;
+      }
+      
+      .total-amount {
+        color: #667eea;
+        font-size: 1.5rem;
+      }
+      
+      .order-card-footer {
+        padding: 1.5rem;
+        background: #f9fafb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+      
+      .status-note {
+        font-size: 0.875rem;
+        color: #666;
+      }
+      
+      .status-note.success {
+        color: #10b981;
+        font-weight: 500;
+      }
+      
+      .status-note.error {
+        color: #ef4444;
+        font-weight: 500;
+      }
+      
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+        display: inline-block;
+        text-align: center;
+      }
+      
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+      
+      .btn-outline {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+      }
+      
+      .btn-outline:hover {
+        background: #667eea;
+        color: white;
+      }
+      
+      @media (max-width: 768px) {
+        .orders-section {
+          padding: 1rem 0;
+        }
+      
+        .order-card-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+      
+        .order-status-badge {
+          align-self: flex-end;
+        }
+      
+        .order-card-footer {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      
+        .btn {
+          width: 100%;
+        }
+      
+        .order-info-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  @endslot
+@end

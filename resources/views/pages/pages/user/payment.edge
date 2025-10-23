@@ -1,0 +1,350 @@
+@layout.app({ title: 'Payment' })
+  @slot('main')
+    <div class="payment-section">
+      <div class="container">
+        <h1 class="page-title">
+          💳 Payment
+        </h1>
+
+        {{-- Payment Status Banner --}}
+        @if(order.status === 'pending')
+          <div class="alert alert-warning">
+            <div class="alert-icon">
+              ⏳
+            </div>
+            <div class="alert-content">
+              <h3>
+                Payment Pending
+              </h3>
+              <p>
+                Your order is confirmed. Please complete the payment below.
+              </p>
+            </div>
+          </div>
+        @elseif(order.status === 'processing')
+          <div class="alert alert-info">
+            <div class="alert-icon">
+              🔄
+            </div>
+            <div class="alert-content">
+              <h3>
+                Payment Processing
+              </h3>
+              <p>
+                We're processing your payment. Please wait for confirmation.
+              </p>
+            </div>
+          </div>
+        @elseif(order.status === 'completed')
+          <div class="alert alert-success">
+            <div class="alert-icon">
+              ✅
+            </div>
+            <div class="alert-content">
+              <h3>
+                Payment Successful!
+              </h3>
+              <p>
+                Your order has been confirmed and is being prepared.
+              </p>
+            </div>
+          </div>
+        @elseif(order.status === 'failed')
+          <div class="alert alert-error">
+            <div class="alert-icon">
+              ❌
+            </div>
+            <div class="alert-content">
+              <h3>
+                Payment Failed
+              </h3>
+              <p>
+                There was an issue processing your payment. Please try again.
+              </p>
+            </div>
+          </div>
+        @end
+        
+        {{-- Order Details --}}
+        <div class="payment-card">
+          <div class="payment-card-header">
+            <div>
+              <h2>
+                Order #{{ order.id }}
+              </h2>
+              <p class="order-date">
+                Order Date: {{ order.formattedCreatedAt }}
+              </p>
+            </div>
+            <span class="order-status status-{{ order.status }}">{{ order.status }}</span>
+          </div>
+
+          <div class="payment-card-body">
+            <div class="order-info-grid">
+              <div class="order-info-item">
+                <h3>
+                  📍 Shipping Address
+                </h3>
+                <p>
+                  {{ order.shippingAddress }}
+                </p>
+              </div>
+              <div class="order-info-item">
+                <h3>
+                  📞 Contact
+                </h3>
+                <p>
+                  {{ order.phoneNumber }}
+                </p>
+              </div>
+              <div class="order-info-item">
+                <h3>
+                  💰 Payment Method
+                </h3>
+                <p class="capitalize-text">
+                  {{ order.formattedPaymentMethod }}
+                </p>
+              </div>
+            </div>
+
+            <div class="order-items-section">
+              <h3>
+                📦 Order Items
+              </h3>
+              <div class="order-items">
+                @each(item in order.items)
+                  <div class="order-item">
+                    <div class="order-item-info">
+                      <span class="item-icon">{{ item.product.icon }}</span>
+                      <div class="item-details">
+                        <div class="item-name">
+                          {{ item.product.name }}
+                        </div>
+                        <div class="item-qty">
+                          Qty: {{ item.quantity }} × {{ item.formattedPrice }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="item-total">
+                      {{ item.formattedSubtotal }}
+                    </div>
+                  </div>
+                @end
+              </div>
+            </div>
+
+            <div class="order-total">
+              <span>Total Amount</span>
+              <strong>{{ order.formattedTotalAmount }}</strong>
+            </div>
+          </div>
+        </div>
+
+        {{-- Payment Actions --}}
+        @if(order.status === 'pending')
+          <div class="payment-action-card">
+            <h3>
+              💳 Complete Payment
+            </h3>
+
+            @if(order.paymentMethod === 'cash')
+              <div class="payment-instructions">
+                <div class="instruction-icon">
+                  💵
+                </div>
+                <p>
+                  You have selected <strong>Cash on Delivery</strong>.
+                </p>
+                <p>
+                  Please prepare the exact amount when the order arrives.
+                </p>
+              </div>
+              <form action="/orders/{{ order.id }}/payment" method="POST" data-confirm-action="Confirm your order?">
+                {{ csrfField() }}
+                <input type="hidden" name="status" value="processing" />
+                <button type="submit" class="btn btn-primary btn-block btn-large">
+                  Confirm Order ✓
+                </button>
+              </form>
+
+            @elseif(order.paymentMethod === 'bank_transfer')
+              <div class="payment-instructions">
+                <div class="instruction-icon">
+                  🏦
+                </div>
+                <p>
+                  Please transfer to the following bank account:
+                </p>
+              </div>
+              <div class="bank-details">
+                <div class="bank-detail-row">
+                  <span class="label">Bank:</span>
+                  <strong>BCA</strong>
+                </div>
+                <div class="bank-detail-row">
+                  <span class="label">Account Number:</span>
+                  <strong>1234567890</strong>
+                </div>
+                <div class="bank-detail-row">
+                  <span class="label">Account Name:</span>
+                  <strong>Food Store</strong>
+                </div>
+                <div class="bank-detail-row">
+                  <span class="label">Amount:</span>
+                  <strong class="amount">{{ order.formattedTotalAmount }}</strong>
+                </div>
+              </div>
+              <form
+                action="/orders/{{ order.id }}/payment"
+                method="POST"
+                data-confirm-action="Confirm that you have transferred the payment?"
+              >
+                {{ csrfField() }}
+                <input type="hidden" name="status" value="processing" />
+                <button type="submit" class="btn btn-primary btn-block btn-large">
+                  I Have Transferred 💸
+                </button>
+              </form>
+
+            @elseif(order.paymentMethod === 'credit_card')
+              <div class="payment-instructions">
+                <div class="instruction-icon">
+                  💳
+                </div>
+                <p>
+                  You will be redirected to the payment gateway.
+                </p>
+              </div>
+              <form action="/orders/{{ order.id }}/payment" method="POST">
+                {{ csrfField() }}
+                <input type="hidden" name="status" value="processing" />
+                <button type="submit" class="btn btn-primary btn-block btn-large">
+                  Pay with Credit Card →
+                </button>
+              </form>
+
+            @elseif(order.paymentMethod === 'e_wallet')
+              <div class="payment-instructions">
+                <div class="instruction-icon">
+                  📱
+                </div>
+                <p>
+                  Choose your e-wallet provider to complete payment.
+                </p>
+              </div>
+              <form action="/orders/{{ order.id }}/payment" method="POST">
+                {{ csrfField() }}
+                <input type="hidden" name="status" value="processing" />
+                <button type="submit" class="btn btn-primary btn-block btn-large">
+                  Pay with E-Wallet →
+                </button>
+              </form>
+
+            @else
+              <form action="/orders/{{ order.id }}/payment" method="POST">
+                {{ csrfField() }}
+                <input type="hidden" name="status" value="processing" />
+                <button type="submit" class="btn btn-primary btn-block btn-large">
+                  Pay Now 💳
+                </button>
+              </form>
+            @end
+            
+            {{-- Cancel Order Option --}}
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e5e7eb; text-align: center;">
+              <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">
+                Changed your mind?
+              </p>
+              <form
+                action="/orders/{{ order.id }}/payment"
+                method="POST"
+                data-confirm-action="Are you sure you want to cancel this order?"
+              >
+                {{ csrfField() }}
+                <input type="hidden" name="status" value="cancelled" />
+                <button type="submit" class="btn btn-outline-danger">
+                  Cancel Order
+                </button>
+              </form>
+            </div>
+          </div>
+
+        @elseif(order.status === 'processing')
+          <div class="payment-status-card">
+            <div class="status-icon processing">
+              🔄
+            </div>
+            <h3>
+              Payment is Being Verified
+            </h3>
+            <p>
+              Your payment confirmation has been submitted and is being verified by our admin team.
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+              <strong>Note:</strong>If you need to cancel this order, you can do so below.
+            </p>
+            <div class="btn-group">
+              <a href="{{ route('orders.index') }}" class="btn btn-outline">
+                View All Orders
+              </a>
+              <form
+                action="/orders/{{ order.id }}/payment"
+                method="POST"
+                data-confirm-action="Are you sure you want to cancel this order?"
+                style="display: inline;"
+              >
+                {{ csrfField() }}
+                <input type="hidden" name="status" value="cancelled" />
+                <button type="submit" class="btn btn-danger">
+                  Cancel Order
+                </button>
+              </form>
+            </div>
+          </div>
+
+        @elseif(order.status === 'completed')
+          <div class="payment-status-card">
+            <div class="status-icon success">
+              ✅
+            </div>
+            <h3>
+              Thank You for Your Order!
+            </h3>
+            <p>
+              Your order will be delivered soon. Track your order status anytime.
+            </p>
+            <div class="btn-group">
+              <a href="/menu" class="btn btn-outline">
+                Continue Shopping
+              </a>
+              <a href="{{ route('orders.index') }}" class="btn btn-primary">
+                View All Orders
+              </a>
+            </div>
+          </div>
+
+        @elseif(order.status === 'failed')
+          <div class="payment-status-card">
+            <div class="status-icon error">
+              ❌
+            </div>
+            <h3>
+              Payment Failed
+            </h3>
+            <p>
+              There was an issue with your payment. Please try again or contact support.
+            </p>
+            <div class="btn-group">
+              <a href="/menu" class="btn btn-outline">
+                Back to Menu
+              </a>
+              <a href="/orders/{{ order.id }}/payment" class="btn btn-primary">
+                Try Again
+              </a>
+            </div>
+          </div>
+        @end
+      </div>
+    </div>
+  @endslot
+@end

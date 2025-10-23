@@ -1,0 +1,163 @@
+@layout.app({ title: product.name })
+  @slot('main')
+    <section class="product-detail-section">
+      <div class="container">
+        <!-- Product Main Content -->
+        <div class="product-detail-card">
+          <div class="product-detail-grid">
+            <!-- Product Image -->
+            <div class="product-image-container">
+              <div class="product-icon-display">
+                {{ product.icon }}
+              </div>
+              @if(product.badge)
+                <div class="product-badge-tag badge {{ product.badge }}">
+                  @if(product.badge === 'popular')
+                    POPULER
+                  @elseif(product.badge === 'spicy')
+                    PEDAS
+                  @elseif(product.badge === 'healthy')
+                    SEHAT
+                  @elseif(product.badge === 'premium')
+                    PREMIUM
+                  @end
+                </div>
+              @end
+            </div>
+
+            <!-- Product Info -->
+            <div class="product-info-section">
+              <div class="product-header">
+                @if(product.badge)
+                  <span class="badge-enak">
+                    @if(product.badge === 'popular')
+                      POPULER
+                    @elseif(product.badge === 'spicy')
+                      PEDAS
+                    @elseif(product.badge === 'healthy')
+                      SEHAT
+                    @elseif(product.badge === 'premium')
+                      PREMIUM
+                    @end
+                  </span>
+                @end
+                <h1 class="product-title">
+                  {{ product.name }}
+                </h1>
+                <p class="product-price-large">
+                  Rp {{ product.price.toLocaleString('id-ID') }}
+                </p>
+              </div>
+
+              <div class="product-description-box">
+                <h3 class="detail-heading">
+                  Deskripsi
+                </h3>
+                <p class="description-text">
+                  {{ product.description }}
+                </p>
+              </div>
+
+              <div class="product-ingredients-box">
+                <h3 class="detail-heading">
+                  Detail Menu
+                </h3>
+                <ul class="ingredients-list">
+                  @each(ingredient in product.ingredients)
+                    <li>
+                      {{ ingredient }}
+                    </li>
+                  @end
+                </ul>
+              </div>
+
+              <div class="product-category-box">
+                <strong>Kategori:</strong>
+                <span class="category-badge">
+                  @if(product.category === 'ricebowl')
+                    Rice Bowl
+                  @elseif(product.category === 'paket')
+                    Paket Hemat
+                  @elseif(product.category === 'minuman')
+                    Minuman
+                  @else
+                    {{ product.category }}
+                  @end
+                </span>
+              </div>
+
+              <div class="product-action-buttons">
+                @if(auth.user)
+                  <form action="{{ route('wishlist.add', [product.id]) }}" method="POST" style="flex: 1;">
+                    {{ csrfField() }}
+                    <button type="submit" class="btn-wishlist">
+                      ❤️ Tambah ke Wishlist
+                    </button>
+                  </form>
+                  <form action="{{ route('cart.store') }}" method="POST" style="flex: 1;">
+                    {{ csrfField() }}
+                    <input type="hidden" name="productId" value="{{ product.id }}" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button type="submit" class="btn-cart">
+                      🛒 Tambah ke Keranjang
+                    </button>
+                  </form>
+                @else
+                  <a href="{{ route('auth.login') }}" class="btn-wishlist" style="flex: 1; text-align: center;">
+                    🔒 Login untuk Memesan
+                  </a>
+                @end
+                <a href="{{ route('user.menu') }}" class="btn-menu">
+                  Kembali ke Menu
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Related Products -->
+        @if(relatedProducts.length > 0)
+          <div class="related-products-section">
+            <h2 class="related-title">
+              Menu Lainnya
+            </h2>
+            <div class="related-products-grid">
+              @each(relatedProduct in relatedProducts)
+                <div class="bowl-card">
+                  <div class="bowl-icon">
+                    {{ relatedProduct.icon }}
+                  </div>
+                  <h3>
+                    {{ relatedProduct.name }}
+                  </h3>
+                  <p>
+                    {{ relatedProduct.description.substring(0, 80) }}...
+                  </p>
+                  <span class="price">Rp {{ relatedProduct.price.toLocaleString('id-ID') }}</span>
+                  @if(relatedProduct.badge)
+                    <span class="badge {{ relatedProduct.badge }}">
+                      @if(relatedProduct.badge === 'popular')
+                        POPULER
+                      @elseif(relatedProduct.badge === 'spicy')
+                        PEDAS
+                      @elseif(relatedProduct.badge === 'healthy')
+                        SEHAT
+                      @elseif(relatedProduct.badge === 'premium')
+                        PREMIUM
+                      @end
+                    </span>
+                  @end
+                  <div style="margin-top: 15px;">
+                    <a href="{{ route('user.product', [relatedProduct.id]) }}" class="btn btn-primary">
+                      Lihat Detail
+                    </a>
+                  </div>
+                </div>
+              @end
+            </div>
+          </div>
+        @end
+      </div>
+    </section>
+  @endslot
+@end
